@@ -361,7 +361,7 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uC99>1</uC99>
             <useXO>0</useXO>
             <v6Lang>0</v6Lang>
             <v6LangP>0</v6LangP>
@@ -369,7 +369,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\inc;..\..\lib\stm32\inc;..\..\lib\cmsis\inc;..\..\board\inc</IncludePath>
+              <IncludePath>..\..\inc;..\..\lib\stm32\inc;..\..\lib\cmsis\inc;..\..\board\inc;..\..\inc\xtos</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -452,6 +452,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\lib\stm32\src\stm32f4xx_dma.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f4xx_iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\stm32\src\stm32f4xx_iwdg.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_wwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\stm32\src\stm32f4xx_wwdg.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -466,6 +476,21 @@
               <FileName>usart4.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\board\src\usart4.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>xtos</GroupName>
+          <Files>
+            <File>
+              <FileName>xtos.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\xtos\xtos.c</FilePath>
+            </File>
+            <File>
+              <FileName>xtos_asm.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\..\xtos\xtos_asm.s</FilePath>
             </File>
           </Files>
         </Group>
