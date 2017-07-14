@@ -118,6 +118,7 @@ typedef struct scb_regs {
 #define SCB_AIRCR_PRIGROUP		((uint32)0x00000700)        /* 中断分组控制器 */
 #define SCB_AIRCR_ENDIANESS		((uint32)0x00008000)        /* 数据大小端存储,为0小端存储 */
 #define SCB_AIRCR_VECTKEY		((uint32)0xFFFF0000)        /* 对该寄存器的写操作必须保证VECTKEY字段写入0x5FA,读操作返回0xFA05 */
+#define SCB_AIRCR_KEY_VALUE     ((uint32)0x05FA0000)
 
 /*
  * 系统控制寄存器 SCB_SCR
