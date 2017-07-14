@@ -230,5 +230,8 @@ typedef struct usart_regs {
 #define UART5  ((usart_regs_t *) UART5_BASE)
 #define USART6 ((usart_regs_t *) USART6_BASE)
 
-
+void uart_init(usart_regs_t *uart, uint32 baudrate);
+void uart_send_byte(usart_regs_t *uart, uint8 value);
+void uart_send_bytes(usart_regs_t *uart, const uint8 *buf, uint32 len);
+void uart_send_str(usart_regs_t *uart, const uint8 *str);
 
