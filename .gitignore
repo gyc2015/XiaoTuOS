@@ -7,4 +7,4 @@
 /pro/Particle/Objects
 /pro/Particle/*.uvoptx
 /pro/Particle/*.uvguix.*
-
+*.TMP

@@ -3,8 +3,7 @@
  * stm32f407_rcc - 复位和时钟控制,Reset and Clock Control
  *
  ************************************** 高乙超.2016.1224 ***/
-#ifndef STM32F407_RCC_H
-#define STM32F407_RCC_H
+#pragma once
 
 #include <types.h>
 
@@ -604,12 +603,3 @@ typedef struct rcc_regs {
 
 
 
-
-
-
-
-
-
-
-
-#endif
