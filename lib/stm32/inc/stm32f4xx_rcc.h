@@ -1,18 +1,19 @@
 /***********************************************************
- *
- * stm32f407_rcc - 复位和时钟控制,Reset and Clock Control
- *
- ************************************** 高乙超.2016.1224 ***/
-#pragma once
+*
+* stm32f407_rcc - 复位和时钟控制,Reset and Clock Control
+*
+************************************** 高乙超.2016.1224 ***/
+#ifndef STM32F407_RCC_H
+#define STM32F407_RCC_H
 
 #include <types.h>
 
 /*
- * AHB1外设时钟使能寄存器 RCC_AHB1ENR
- * 偏移地址: 0x30
- * 复位值: 0x0010 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* AHB1外设时钟使能寄存器 RCC_AHB1ENR
+* 偏移地址: 0x30
+* 复位值: 0x0010 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 struct rcc_ahb1enr_bits {
     uint32 gpioa : 1;
     uint32 gpiob : 1;
@@ -44,6 +45,57 @@ union rcc_ahb1enr {
     struct rcc_ahb1enr_bits bits;
     uint32 all;
 };
+/*
+* AHB1外设时钟使能寄存器 RCC_AHB2ENR
+* 偏移地址: 0x34
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
+struct rcc_ahb2enr_bits {
+    uint32 dcmi : 1; /* Camera Interface */
+    uint32 r0 : 3;
+    uint32 cryp : 1; /* Cryptographic module */
+    uint32 hash : 1; /* Hash */
+    uint32 rng : 1; /* random number */
+    uint32 otgfs : 1; /* usb otg fs */
+    uint32 r1 : 24;
+};
+union rcc_ahb2enr {
+    struct rcc_ahb2enr_bits bits;
+    uint32 all;
+};
+
+/*
+* AHB1外设时钟使能寄存器 RCC_AHB2ENR
+* 偏移地址: 0x44
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
+struct rcc_apb2enr_bits {
+    uint32 tim1 : 1;
+    uint32 tim8 : 1;
+    uint32 r0 : 2;
+    uint32 usart1 : 1;
+    uint32 usart6 : 1;
+    uint32 r1 : 2;
+    uint32 adc1 : 1;
+    uint32 adc2 : 1;
+    uint32 adc3 : 1;
+    uint32 sdio : 1;
+    uint32 spi1 : 1;
+    uint32 r2 : 1;
+    uint32 syscfg : 1;
+    uint32 r3 : 1;
+    uint32 tim9 : 1;
+    uint32 tim10 : 1;
+    uint32 tim11 : 1;
+    uint32 r4 : 13;
+};
+union rcc_apb2enr {
+    struct rcc_apb2enr_bits bits;
+    uint32 all;
+};
+
 
 typedef struct rcc_regs {
     volatile  uint32 CR;            /* 时钟控制寄存器, offset: 0x00 */
@@ -58,11 +110,11 @@ typedef struct rcc_regs {
     volatile  uint32 APB2RSTR;      /* APB2外设复位寄存器, offset: 0x24 */
     uint32  RESERVED1[2];           /* 保留, 0x28-0x2C */
     volatile  union rcc_ahb1enr AHB1ENR;       /* AHB1外设时钟使能寄存器, offset: 0x30 */
-    volatile  uint32 AHB2ENR;       /* AHB2外设时钟使能寄存器, offset: 0x34 */
+    volatile  union rcc_ahb2enr AHB2ENR;       /* AHB2外设时钟使能寄存器, offset: 0x34 */
     volatile  uint32 AHB3ENR;       /* AHB3外设时钟使能寄存器, offset: 0x38 */
     uint32 RESERVED2;               /* 保留, 0x3C */
     volatile  uint32 APB1ENR;       /* APB1外设时钟使能寄存器, offset: 0x40 */
-    volatile  uint32 APB2ENR;       /* APB2外设时钟使能寄存器, offset: 0x44 */
+    volatile  union rcc_apb2enr APB2ENR;       /* APB2外设时钟使能寄存器, offset: 0x44 */
     uint32 RESERVED3[2];            /* 保留, 0x48-0x4C */
     volatile  uint32 AHB1LPENR;     /* AHB1低电压模式下外设时钟使能寄存器, offset: 0x50 */
     volatile  uint32 AHB2LPENR;     /* AHB2低电压模式下外设时钟使能寄存器, offset: 0x54 */
@@ -84,11 +136,11 @@ typedef struct rcc_regs {
 #define RCC ((rcc_regs_t *) RCC_BASE)
 
 /*
- * 时钟控制寄存器 RCC_CR
- * 偏移地址: 0x00
- * 复位值: 0x0000 XX83
- * 访问: 无等待状态, word/half-word/byte访问
- */
+* 时钟控制寄存器 RCC_CR
+* 偏移地址: 0x00
+* 复位值: 0x0000 XX83
+* 访问: 无等待状态, word/half-word/byte访问
+*/
 #define RCC_CR_RESET_VALUE  ((uint32)0x00000083)        /* 复位值           */
 #define RCC_CR_HSION        ((uint32)0x00000001)        /* 内部高速时钟 使能 */
 #define RCC_CR_HSIRDY       ((uint32)0x00000002)        /* 内部高速时钟 就绪 */
@@ -104,16 +156,16 @@ typedef struct rcc_regs {
 #define RCC_CR_PLLI2SRDY    ((uint32)0x08000000)        /* PLLI2S      就绪 */
 
 /*
- * 锁相环配置寄存器 RCC_PLLCFGR
- * 偏移地址: 0x04
- * 复位值: 0x2400 3010
- * 访问: 无等待状态, word/half-word/byte访问
- *
- * 系统时钟计算方法：
- * f(VCO clock) = f(PLL clock input) * PLLN / PLLM
- * f(PLL general clock output) = f(VCO clock) / PLLP
- * f(USB OTG FS, SDIO, RNG clock output) = f(VCO clock) / PLLQ
- */
+* 锁相环配置寄存器 RCC_PLLCFGR
+* 偏移地址: 0x04
+* 复位值: 0x2400 3010
+* 访问: 无等待状态, word/half-word/byte访问
+*
+* 系统时钟计算方法：
+* f(VCO clock) = f(PLL clock input) * PLLN / PLLM
+* f(PLL general clock output) = f(VCO clock) / PLLP
+* f(USB OTG FS, SDIO, RNG clock output) = f(VCO clock) / PLLQ
+*/
 #define RCC_PLLCFGR_RESET_VALUE ((uint32)0x24003010)        /* 复位值           */
 #define RCC_PLLCFGR_PLLM        ((uint32)0x0000003F)        /* PLLM */
 #define RCC_PLLCFGR_PLLN        ((uint32)0x00007FC0)        /* PLLN */
@@ -123,12 +175,12 @@ typedef struct rcc_regs {
 #define RCC_PLLCFGR_PLLSRC_HSE  ((uint32)0x00400000)
 #define RCC_PLLCFGR_PLLQ        ((uint32)0x0F000000)        /* PLLQ */
 
- /*
- * 时钟配置寄存器 RCC_CFGR
- * 偏移地址: 0x08
- * 复位值: 0x0000 0000
- * 访问: 当访问发生在时钟切换时会有1或者两个等待周期, word/half-word/byte访问
- */
+/*
+* 时钟配置寄存器 RCC_CFGR
+* 偏移地址: 0x08
+* 复位值: 0x0000 0000
+* 访问: 当访问发生在时钟切换时会有1或者两个等待周期, word/half-word/byte访问
+*/
 #define RCC_CFGR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_CFGR_SW             ((uint32)0x00000003)    /* 系统时钟源选择位 SW[1:0]*/
@@ -234,11 +286,11 @@ typedef struct rcc_regs {
 #define RCC_CFGR_MCO2_PLL       ((uint32)0xC0000000)
 
 /*
- * 时钟中断寄存器 RCC_CIR
- * 偏移地址: 0x0C
- * 复位值: 0x0000 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* 时钟中断寄存器 RCC_CIR
+* 偏移地址: 0x0C
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_CIR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_CIR_LSIRDYF         ((uint32)0x00000001)        /* LSI时钟就绪中断,LSIRDYIE=1时由硬件置1,软件写1到LSIRDYC位清除 */
@@ -265,11 +317,11 @@ typedef struct rcc_regs {
 #define RCC_CIE_ALLE            ((uint32)0x00003F00)        /* 打开所有中断 */
 #define RCC_CIR_ALLC            ((uint32)0x00BF0000)        /* 清除所有中断标志 */
 /*
- * AHB1外设复位寄存器 RCC_AHB1RSTR
- * 偏移地址: 0x10
- * 复位值: 0x0000 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* AHB1外设复位寄存器 RCC_AHB1RSTR
+* 偏移地址: 0x10
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_AHB1RSTR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_AHB1RSTR_GPIOA    ((uint32)0x00000001)
@@ -287,11 +339,11 @@ typedef struct rcc_regs {
 #define RCC_AHB1RSTR_ETHMAC   ((uint32)0x02000000)
 #define RCC_AHB1RSTR_OTGHS    ((uint32)0x20000000)
 /*
- * AHB2外设复位寄存器 RCC_AHB2RSTR
- * 偏移地址: 0x14
- * 复位值: 0x0000 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* AHB2外设复位寄存器 RCC_AHB2RSTR
+* 偏移地址: 0x14
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_AHB2RSTR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_AHB2RSTR_DCMI    ((uint32)0x00000001)
@@ -300,20 +352,20 @@ typedef struct rcc_regs {
 #define RCC_AHB2RSTR_RNG     ((uint32)0x00000040)
 #define RCC_AHB2RSTR_OTGFS   ((uint32)0x00000080)
 /*
- * AHB3外设复位寄存器 RCC_AHB3RSTR
- * 偏移地址: 0x18
- * 复位值: 0x0000 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* AHB3外设复位寄存器 RCC_AHB3RSTR
+* 偏移地址: 0x18
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_AHB3RSTR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_AHB3RSTR_FSMC    ((uint32)0x00000001)
 /*
- * APB1外设复位寄存器 RCC_APB1RSTR
- * 偏移地址: 0x20
- * 复位值: 0x0000 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* APB1外设复位寄存器 RCC_APB1RSTR
+* 偏移地址: 0x20
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_APB1RSTR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_APB1RSTR_TIM2    ((uint32)0x00000001)
@@ -340,11 +392,11 @@ typedef struct rcc_regs {
 #define RCC_APB1RSTR_PWR     ((uint32)0x10000000)   /* Power Interface */
 #define RCC_APB1RSTR_DAC     ((uint32)0x20000000)
 /*
- * APB2外设复位寄存器 RCC_APB2RSTR
- * 偏移地址: 0x24
- * 复位值: 0x0000 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* APB2外设复位寄存器 RCC_APB2RSTR
+* 偏移地址: 0x24
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_APB2RSTR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_APB2RSTR_TIM1    ((uint32)0x00000001)
@@ -360,11 +412,11 @@ typedef struct rcc_regs {
 #define RCC_APB2RSTR_TIM11   ((uint32)0x00040000)
 
 /*
- * AHB2外设时钟使能寄存器 RCC_AHB2ENR
- * 偏移地址: 0x34
- * 复位值: 0x0000 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* AHB2外设时钟使能寄存器 RCC_AHB2ENR
+* 偏移地址: 0x34
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_AHB2ENR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_AHB2ENR_DCMI       ((uint32)0x00000001)
@@ -373,20 +425,20 @@ typedef struct rcc_regs {
 #define RCC_AHB2ENR_RNG        ((uint32)0x00000040)
 #define RCC_AHB2ENR_OTGFS      ((uint32)0x00000080)
 /*
- * AHB3外设时钟使能寄存器 RCC_AHB3ENR
- * 偏移地址: 0x38
- * 复位值: 0x0000 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* AHB3外设时钟使能寄存器 RCC_AHB3ENR
+* 偏移地址: 0x38
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_AHB3ENR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_AHB3ENR_FSMC       ((uint32)0x00000001)
 /*
- * APB1外设时钟使能寄存器 RCC_APB1ENR
- * 偏移地址: 0x40
- * 复位值: 0x0000 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* APB1外设时钟使能寄存器 RCC_APB1ENR
+* 偏移地址: 0x40
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_APB1ENR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_APB1ENR_TIM2       ((uint32)0x00000001)
@@ -413,11 +465,11 @@ typedef struct rcc_regs {
 #define RCC_APB1ENR_PWR        ((uint32)0x10000000)
 #define RCC_APB1ENR_DAC        ((uint32)0x20000000)
 /*
- * APB2外设时钟使能寄存器 RCC_APB2ENR
- * 偏移地址: 0x44
- * 复位值: 0x0000 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* APB2外设时钟使能寄存器 RCC_APB2ENR
+* 偏移地址: 0x44
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_APB2ENR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_APB2ENR_TIM1       ((uint32)0x00000001)
@@ -434,11 +486,11 @@ typedef struct rcc_regs {
 #define RCC_APB2ENR_TIM10      ((uint32)0x00020000)
 #define RCC_APB2ENR_TIM11      ((uint32)0x00040000)
 /*
- * 低电压模式下AHB1外设时钟使能寄存器 RCC_AHB1LPENR
- * 偏移地址: 0x50
- * 复位值: 0x7E67 91FF
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* 低电压模式下AHB1外设时钟使能寄存器 RCC_AHB1LPENR
+* 偏移地址: 0x50
+* 复位值: 0x7E67 91FF
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_AHB1LPENR_RESET_VALUE    ((uint32)0x7E6791FF)    /* 复位值 */
 
 #define RCC_AHB1LPENR_GPIOA       ((uint32)0x00000001)
@@ -464,11 +516,11 @@ typedef struct rcc_regs {
 #define RCC_AHB1LPENR_OTGHS       ((uint32)0x20000000)
 #define RCC_AHB1LPENR_OTGHSULPI   ((uint32)0x40000000)
 /*
- * 低电压模式下AHB2外设时钟使能寄存器 RCC_AHB2LPENR
- * 偏移地址: 0x54
- * 复位值: 0x0000 00F1
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* 低电压模式下AHB2外设时钟使能寄存器 RCC_AHB2LPENR
+* 偏移地址: 0x54
+* 复位值: 0x0000 00F1
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_AHB2LPENR_RESET_VALUE    ((uint32)0x000000F1)    /* 复位值 */
 
 #define RCC_AHB2LPENR_DCMI       ((uint32)0x00000001)
@@ -477,20 +529,20 @@ typedef struct rcc_regs {
 #define RCC_AHB2LPENR_RNG        ((uint32)0x00000040)
 #define RCC_AHB2LPENR_OTGFS      ((uint32)0x00000080)
 /*
- * 低电压模式下AHB3外设时钟使能寄存器 RCC_AHB3LPENR
- * 偏移地址: 0x58
- * 复位值: 0x0000 0001
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* 低电压模式下AHB3外设时钟使能寄存器 RCC_AHB3LPENR
+* 偏移地址: 0x58
+* 复位值: 0x0000 0001
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_AHB3LPENR_RESET_VALUE    ((uint32)0x00000001)    /* 复位值 */
 
 #define RCC_AHB3LPENR_FSMC       ((uint32)0x00000001)
 /*
- * 低电压模式下APB1外设时钟使能寄存器 RCC_APB1LPENR
- * 偏移地址: 0x60
- * 复位值: 0x36FE C9FF
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* 低电压模式下APB1外设时钟使能寄存器 RCC_APB1LPENR
+* 偏移地址: 0x60
+* 复位值: 0x36FE C9FF
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_APB1LPENR_RESET_VALUE    ((uint32)0x36FEC9FF)    /* 复位值 */
 
 #define RCC_APB1LPENR_TIM2       ((uint32)0x00000001)
@@ -517,11 +569,11 @@ typedef struct rcc_regs {
 #define RCC_APB1LPENR_PWR        ((uint32)0x10000000)
 #define RCC_APB1LPENR_DAC        ((uint32)0x20000000)
 /*
- * 低电压模式下APB2外设时钟使能寄存器 RCC_APB2LPENR
- * 偏移地址: 0x64
- * 复位值: 0x0407 5F33
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* 低电压模式下APB2外设时钟使能寄存器 RCC_APB2LPENR
+* 偏移地址: 0x64
+* 复位值: 0x0407 5F33
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_APB2LPENR_RESET_VALUE    ((uint32)0x04075F33)    /* 复位值 */
 
 #define RCC_APB2LPENR_TIM1       ((uint32)0x00000001)
@@ -538,12 +590,12 @@ typedef struct rcc_regs {
 #define RCC_APB2LPENR_TIM10      ((uint32)0x00020000)
 #define RCC_APB2LPENR_TIM11      ((uint32)0x00040000)
 /*
- * backup domain controller register RCC_BDCR
- * 偏移地址: 0x70
- * 复位值: 0x0000 0000, reset by reset domain reset
- * 访问: 有0到3个时钟的等待状态, word/half-word/byte访问
- *       添加等待状态以防止连续的访问该寄存器
- */
+* backup domain controller register RCC_BDCR
+* 偏移地址: 0x70
+* 复位值: 0x0000 0000, reset by reset domain reset
+* 访问: 有0到3个时钟的等待状态, word/half-word/byte访问
+*       添加等待状态以防止连续的访问该寄存器
+*/
 #define RCC_BDCR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_BDCR_LSEON       ((uint32)0x00000001)
@@ -553,12 +605,12 @@ typedef struct rcc_regs {
 #define RCC_BDCR_RTCEN       ((uint32)0x00008000)
 #define RCC_BDCR_BDRST       ((uint32)0x00010000)
 /*
- * 时钟控制和状态寄存器 RCC_CSR
- * 偏移地址: 0x74
- * 复位值: 0x0E00 0000, reset by system reset except reset  flags by power reset only
- * 访问: 有0到3个时钟的等待状态, word/half-word/byte访问
- *       添加等待状态以防止连续的访问该寄存器
- */
+* 时钟控制和状态寄存器 RCC_CSR
+* 偏移地址: 0x74
+* 复位值: 0x0E00 0000, reset by system reset except reset  flags by power reset only
+* 访问: 有0到3个时钟的等待状态, word/half-word/byte访问
+*       添加等待状态以防止连续的访问该寄存器
+*/
 #define RCC_CSR_RESET_VALUE    ((uint32)0x0E000000)    /* 复位值 */
 
 #define RCC_CSR_LSION       ((uint32)0x00000001)
@@ -572,11 +624,11 @@ typedef struct rcc_regs {
 #define RCC_CSR_WWDGRSTF    ((uint32)0x40000000)
 #define RCC_CSR_LPWRRSTF    ((uint32)0x80000000)
 /*
- * 扩频时钟寄存器 RCC_SSCGR
- * 偏移地址: 0x80
- * 复位值: 0x0000 0000
- * 访问: 没有等待状态, word/half-word/byte访问
- */
+* 扩频时钟寄存器 RCC_SSCGR
+* 偏移地址: 0x80
+* 复位值: 0x0000 0000
+* 访问: 没有等待状态, word/half-word/byte访问
+*/
 #define RCC_SSCGR_RESET_VALUE    ((uint32)0x00000000)    /* 复位值 */
 
 #define RCC_SSCGR_MODPER       ((uint32)0x00001FFF)
@@ -584,14 +636,14 @@ typedef struct rcc_regs {
 #define RCC_SSCGR_SPREADSEL    ((uint32)0x40000000)
 #define RCC_SSCGR_SSCGEN       ((uint32)0x80000000)
 /*
- * PLLI2S寄存器 RCC_PLLI2SCFGR
- * 偏移地址: 0x84
- * 复位值: 0x2000 3000
- * 访问: 没有等待状态, word/half-word/byte访问
- * PLLI2S时钟计算方法：
- * f(VCO clock) = f(PLLI2S clock input) * PLLI2SN / PLLM
- * f(PLLI2S clock output) = f(VCO clock) / PLLI2SR
- */
+* PLLI2S寄存器 RCC_PLLI2SCFGR
+* 偏移地址: 0x84
+* 复位值: 0x2000 3000
+* 访问: 没有等待状态, word/half-word/byte访问
+* PLLI2S时钟计算方法：
+* f(VCO clock) = f(PLLI2S clock input) * PLLI2SN / PLLM
+* f(PLLI2S clock output) = f(VCO clock) / PLLI2SR
+*/
 #define RCC_PLLI2SCFGR_RESET_VALUE    ((uint32)0x20003000)    /* 复位值 */
 
 #define RCC_PLLI2SCFGR_PLLI2SN       ((uint32)0x00007FC0)
@@ -602,4 +654,4 @@ typedef struct rcc_regs {
 
 
 
-
+#endif
