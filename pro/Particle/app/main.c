@@ -2,6 +2,7 @@
 #include <xtos.h>
 #include <led.h>
 #include <uart4.h>
+#include <w5500.h>
 
 /***************************************************/
 #define TASKA_STK_SIZE 1024
@@ -76,7 +77,8 @@ int main(void) {
         for (int j = 0; j < 1000; j++)
             ;
 
-    iwdg_init(IWDG_PR_DIV_16, 0xfff);
+    w5500_init();
+    //iwdg_init(IWDG_PR_DIV_16, 0xfff);
     //wwdg_init(WWDG_DIV8, 0x7F, 0x7E);
 
     xtos_create_task(&taskA, taska, &taskA_Stk[TASKA_STK_SIZE - 1]);

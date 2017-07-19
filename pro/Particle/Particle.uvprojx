@@ -462,6 +462,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\lib\stm32\src\stm32f4xx_wwdg.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f4xx_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\stm32\src\stm32f4xx_spi.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -476,6 +481,11 @@
               <FileName>usart4.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\board\src\usart4.c</FilePath>
+            </File>
+            <File>
+              <FileName>w5500.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\board\src\w5500.c</FilePath>
             </File>
           </Files>
         </Group>
