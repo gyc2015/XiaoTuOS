@@ -18,5 +18,14 @@
  * led_init - 初始化三色灯
  */
 void led_init(void);
+/*
+* led_pwm_init - 初始化PWM控制的三色灯
+*/
+void led_pwm_init(void);
+
+/*
+* led_set_color - 设置灯光颜色
+*/
+void led_set_color(uint8 r, uint8 g, uint8 b);
 
 
