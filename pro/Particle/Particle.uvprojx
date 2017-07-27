@@ -492,6 +492,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\board\src\w5500.c</FilePath>
             </File>
+            <File>
+              <FileName>power.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\board\src\power.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
