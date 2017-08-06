@@ -31,5 +31,9 @@ typedef unsigned char   bool;
 #define NULL 0
 #endif
 
+#define U8Bit(n)    ((uint8)(1 << n))
+#define U16Bit(n)   ((uint16)(1 << n))
+#define U32Bit(n)   ((uint32)(1 << n))
+
 
 #endif
