@@ -12,7 +12,7 @@
 	EXTERN gp_xtos_cur_task
 	EXTERN gp_xtos_next_task
 
-	EXPORT xtos_start
+	EXPORT xtos_first_switch
 	EXPORT xtos_context_switch
 	EXPORT xtos_pendsv_handler
 ;********************************************************************************************************
@@ -31,7 +31,7 @@ PENDSV_SET		EQU     0x10000000                              ; Value to trigger P
 
 ;********************************************************************************************************
 ;                                         启动操作系统
-;                                     void xtos_start(void)
+;                                     void xtos_first_switch(void)
 ;
 ; 1. 配置PendSV的中断优先级
 ;
@@ -42,7 +42,7 @@ PENDSV_SET		EQU     0x10000000                              ; Value to trigger P
 ;
 ;********************************************************************************************************
 
-xtos_start
+xtos_first_switch
     LDR     R0, =SCB_SHP14										; 设置PendSV的优先级
     LDR     R1, =PENDSV_PRI
     STRB    R1, [R0]

@@ -1,8 +1,21 @@
 #include <xtos.h>
 
-struct xtos_task_struct *gp_xtos_cur_task;
-struct xtos_task_struct *gp_xtos_next_task;
+struct xtos_task_descriptor *gp_xtos_cur_task;
+struct xtos_task_descriptor *gp_xtos_next_task;
 
+struct list_head L0_tasks;
+
+void xtos_first_switch(void);
+void xtos_context_switch(void);
+void xtos_pendsv_handler(void);
+/*
+ * xtos_init - 初始化操作系统
+ *
+ * 1. 初始化任务队列
+ */
+void xtos_init() {
+    init_list_head(&L0_tasks);
+}
 /*
  * xtos_task_finished - 任务结束后的回调函数
  */
@@ -17,7 +30,7 @@ void xtos_distroy_task() {
  * @task: 任务入口函数
  * @stk: 任务栈顶
  */
-void xtos_create_task(struct xtos_task_struct * tcb, xtos_task task, uint32 * stk) {
+static uint32* xtos_create_task(struct xtos_task_descriptor * tcb, xtos_task task, uint32 * stk) {
     uint32  *pstk;
     pstk = stk;
     pstk = (uint32 *)((uint32)(pstk) & 0xFFFFFFF8uL);
@@ -77,4 +90,44 @@ void xtos_create_task(struct xtos_task_struct * tcb, xtos_task task, uint32 * st
     *(--pstk) = (uint32)0x04040404uL; // R4
 
     tcb->pTopOfStack = pstk;
+    return pstk;
+}
+/*
+ * xtos_init_task_struct - 创建一个任务，初始化任务栈空间
+ *
+ * @tcb: 任务描述符
+ * @task: 任务入口函数
+ * @stk_bottom: 任务栈底
+ * @pid: 任务id
+ */
+void xtos_init_task_descriptor(struct xtos_task_descriptor *tcb, xtos_task task, uint32 *stk_bottom, uint16 pid) {
+    tcb->pBottomOfStack = stk_bottom;
+    tcb->pTopOfStack = xtos_create_task(tcb, task, stk_bottom);
+    tcb->pid = pid;
+
+    init_list_head(&tcb->list);
+    list_add_tail(&tcb->list, &L0_tasks);
+}
+
+/*
+ * xtos_schedule - 系统调度器
+ */
+void xtos_schedule(void) {
+    list_add_tail(&gp_xtos_next_task->list, &L0_tasks);
+
+    gp_xtos_next_task = list_first_entry(&L0_tasks, struct xtos_task_descriptor, list);
+
+    list_del(&gp_xtos_next_task->list);
+
+    xtos_context_switch();
+}
+/*
+ * xtos_start - 开启操作系统
+ */
+void xtos_start(void) {
+    gp_xtos_next_task = list_first_entry(&L0_tasks, struct xtos_task_descriptor, list);
+
+    list_del(&gp_xtos_next_task->list);
+
+    xtos_first_switch();
 }

@@ -369,7 +369,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\inc;..\..\lib\stm32\inc;..\..\lib\cmsis\inc;..\..\board\inc;..\..\inc\xtos</IncludePath>
+              <IncludePath>..\..\inc;..\..\lib\utils\inc;..\..\lib\stm32\inc;..\..\lib\cmsis\inc;..\..\board\inc;..\..\inc\xtos</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -425,6 +425,46 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>xtos</GroupName>
+          <Files>
+            <File>
+              <FileName>xtos.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\xtos\xtos.c</FilePath>
+            </File>
+            <File>
+              <FileName>xtos_asm.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\..\xtos\xtos_asm.s</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>board</GroupName>
+          <Files>
+            <File>
+              <FileName>led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\board\src\led.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\board\src\usart4.c</FilePath>
+            </File>
+            <File>
+              <FileName>w5500.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\board\src\w5500.c</FilePath>
+            </File>
+            <File>
+              <FileName>power.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\board\src\power.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>libstm32</GroupName>
           <Files>
             <File>
@@ -475,44 +515,22 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>board</GroupName>
+          <GroupName>libutils</GroupName>
           <Files>
             <File>
-              <FileName>led.c</FileName>
+              <FileName>list.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\board\src\led.c</FilePath>
+              <FilePath>..\..\lib\utils\src\list.c</FilePath>
             </File>
             <File>
-              <FileName>usart4.c</FileName>
+              <FileName>utils.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\board\src\usart4.c</FilePath>
-            </File>
-            <File>
-              <FileName>w5500.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\board\src\w5500.c</FilePath>
-            </File>
-            <File>
-              <FileName>power.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\board\src\power.c</FilePath>
+              <FilePath>..\..\lib\utils\src\utils.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>xtos</GroupName>
-          <Files>
-            <File>
-              <FileName>xtos.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\xtos\xtos.c</FilePath>
-            </File>
-            <File>
-              <FileName>xtos_asm.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\xtos\xtos_asm.s</FilePath>
-            </File>
-          </Files>
+          <GroupName>libcmsis</GroupName>
         </Group>
       </Groups>
     </Target>
