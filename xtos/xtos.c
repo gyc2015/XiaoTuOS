@@ -113,6 +113,7 @@ void xtos_init_task_descriptor(struct xtos_task_descriptor *tcb, xtos_task task,
  * xtos_schedule - 系统调度器
  */
 void xtos_schedule(void) {
+    __asm("CPSID    I");
     list_add_tail(&gp_xtos_next_task->list, &L0_tasks);
 
     gp_xtos_next_task = list_first_entry(&L0_tasks, struct xtos_task_descriptor, list);
@@ -120,14 +121,17 @@ void xtos_schedule(void) {
     list_del(&gp_xtos_next_task->list);
 
     xtos_context_switch();
+    __asm("CPSIE   I");
 }
 /*
  * xtos_start - 开启操作系统
  */
 void xtos_start(void) {
+    __asm("CPSID    I");
     gp_xtos_next_task = list_first_entry(&L0_tasks, struct xtos_task_descriptor, list);
 
     list_del(&gp_xtos_next_task->list);
 
     xtos_first_switch();
+    __asm("CPSIE   I");
 }

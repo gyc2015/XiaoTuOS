@@ -4,6 +4,8 @@
 #include <types.h>
 #include <list.h>
 
+#include <xtos_time.h>
+
 // xtos任务入口
 typedef void(*xtos_task)(void);
 

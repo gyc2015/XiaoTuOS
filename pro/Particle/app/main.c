@@ -1,6 +1,8 @@
 #include <stm32f407.h>
 #include <xtos.h>
+#include <systick.h>
 #include <led.h>
+#include <uart4.h>
 
 #include <utils.h>
 
@@ -15,23 +17,25 @@ static struct xtos_task_descriptor taskB;
 void taska() {
     while (1) {
         led_set_color(100, 0, 5);
-        for (int i = 0; i < 1000; i++)
-            delay(10000);
-        xtos_schedule();
+        xtos_delay_ticks(1000);
+        led_set_color(5, 0, 100);
+        xtos_delay_ticks(1000);
     }
 }
 
 void taskb() {
     while (1) {
-        led_set_color(5, 0, 100);
-        for (int i = 0; i < 1000; i++)
-            delay(10000);
-        xtos_schedule();
+        uart4_send_byte('A');
+        xtos_delay_ticks(1000);
+        uart4_send_byte('B');
+        xtos_delay_ticks(1000);
     }
 }
 
 int main(void) {
+    systick_init(168000);
     led_pwm_init();
+    uart4_init(115200);
 
     xtos_init();
     xtos_init_task_descriptor(&taskA, taska, &taskA_Stk[TASKA_STK_SIZE - 1], 0);
