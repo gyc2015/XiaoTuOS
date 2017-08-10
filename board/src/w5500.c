@@ -211,118 +211,190 @@ static bool w5500_send_sncmd(uint8 n, uint8 cmd) {
     return TRUE;
 }
 /*
- * w5500_init_sn - 初始化套接字@n
+ * w5500_init_socket - 初始化套接字
+ *
+ * @socket: 套接字对象
  */
-w5500_error_t w5500_init_socket(uint8 n, uint8 mode, uint16 port) {
-    w5500_error_t err = w5500_close_socket(n);
+w5500_error_t w5500_init_socket(const struct w5500_socket *socket) {
+    w5500_error_t err = w5500_close_socket(socket);
     if (Err_W5500_No_Error != err)
         return err;
     // 配置mode和port
-    w5500_write_byte(W5500_Sn_MR(n), mode);
-    w5500_write_bytes_inv(W5500_Sn_PORT(n), (uint8 *)&port, 2);
+    w5500_write_byte(W5500_Sn_MR(socket->n), socket->mode);
+    w5500_write_bytes_inv(W5500_Sn_PORT(socket->n), (uint8 *)&(socket->local_port), 2);
     // 打开套接字
-    if (!w5500_send_sncmd(n, W5500_SnCR_OPEN))
+    if (!w5500_send_sncmd(socket->n, W5500_SnCR_OPEN))
         return Err_W5500_Socket_CmdErr;
 
     return Err_W5500_No_Error;
 }
 /*
- * w5500_close_sn - 关闭套接字@n
+ * w5500_close_sn - 关闭套接字
+ *
+ * @socket: 套接字对象
  */
-w5500_error_t w5500_close_socket(uint8 n) {
-    if (!w5500_send_sncmd(n, W5500_SnCR_CLOSE))
+w5500_error_t w5500_close_socket(const struct w5500_socket *socket) {
+    if (!w5500_send_sncmd(socket->n, W5500_SnCR_CLOSE))
         return Err_W5500_Socket_CmdErr;
     // 清除中断
-    w5500_write_byte(W5500_Sn_IR(n), W5500_SnIR_All);
+    w5500_write_byte(W5500_Sn_IR(socket->n), W5500_SnIR_All);
     return Err_W5500_No_Error;
 }
 /*
  * w5500_connect_socket - 连接套接字@n,TCP客户端模式
+ *
+ * @socket: 套接字对象
  */
-w5500_error_t w5500_connect_socket(uint8 n, uint8 *ip, uint16 port) {
-    w5500_write_bytes(W5500_Sn_DIPR(n), ip, 4);
-    w5500_write_bytes_inv(W5500_Sn_DPORT(n), (uint8 *)&port, 2);
+w5500_error_t w5500_connect_socket(const struct w5500_socket *socket) {
+    w5500_write_bytes(W5500_Sn_DIPR(socket->n), socket->remote_ip, 4);
+    w5500_write_bytes_inv(W5500_Sn_DPORT(socket->n), (uint8 *)&(socket->remote_port), 2);
     // 建立连接
-    if (!w5500_send_sncmd(n, W5500_SnCR_CONNECT))
+    if (!w5500_send_sncmd(socket->n, W5500_SnCR_CONNECT))
         return Err_W5500_Socket_CmdErr;
     //
-    uint8 tmp = w5500_read_byte(W5500_Sn_IR(n));
-    while (W5500_SnSR_ESTABLISHED != w5500_read_byte(W5500_Sn_SR(n))) {
-        tmp = w5500_read_byte(W5500_Sn_IR(n));
+    uint8 tmp = w5500_read_byte(W5500_Sn_IR(socket->n));
+    while (W5500_SnSR_ESTABLISHED != w5500_read_byte(W5500_Sn_SR(socket->n))) {
+        tmp = w5500_read_byte(W5500_Sn_IR(socket->n));
         if (W5500_SnIR_TIMEOUT & tmp) {
-            w5500_write_byte(W5500_Sn_IR(n), W5500_SnIR_TIMEOUT);
+            w5500_write_byte(W5500_Sn_IR(socket->n), W5500_SnIR_TIMEOUT);
             return Err_W5500_Timeout;
         }
         if (W5500_SnIR_DISCON & tmp) {
-            w5500_write_byte(W5500_Sn_IR(n), W5500_SnIR_DISCON);
+            w5500_write_byte(W5500_Sn_IR(socket->n), W5500_SnIR_DISCON);
             return Err_W5500_Connect_Failed;
         }
     }
     // 清除连接中断
-    w5500_write_byte(W5500_Sn_IR(n), W5500_SnIR_CON);
+    w5500_write_byte(W5500_Sn_IR(socket->n), W5500_SnIR_CON);
     return Err_W5500_No_Error;
 }
 /*
- * w5500_get_sn_received_len - 获取套接字@n接收到的数据长度
+ * w5500_listen_socket - 监听套接字@n, TCP服务器模式
+ *
+ * @socket: 套接字对象
  */
-uint16 w5500_get_socket_received_len(uint8 n) {
+w5500_error_t w5500_listen_socket(const struct w5500_socket *socket) {
+    // 监听连接
+    if (!w5500_send_sncmd(socket->n, W5500_SnCR_LISTEN))
+        return Err_W5500_Socket_CmdErr;
+    return Err_W5500_No_Error;
+}
+/*
+ * w5500_get_sn_received_len - 获取套接字接收到的数据长度
+ *
+ * @socket: 套接字对象
+ */
+uint16 w5500_get_socket_received_len(const struct w5500_socket *socket) {
     uint16 len = 0;
-    w5500_read_bytes_inv(W5500_Sn_RX_RSR(n), (uint8*)&len, 2);
+    w5500_read_bytes_inv(W5500_Sn_RX_RSR(socket->n), (uint8*)&len, 2);
     return len;
 }
 /*
- * w5500_receive_socket - 接收套接字@n
+ * w5500_receive - 接收数据,成功运行则返回接收到的数据长度,否则返回-1
+ *
+ * @socket: 套接字对象
+ * @buf: 数据缓存
+ * @len: 数据长度
  */
-w5500_error_t w5500_receive_socket(uint8 n, uint8 *buf, uint16 len) {
-    if (len == 0)
-        return Err_W5500_No_Error;
-
+int w5500_receive(struct w5500_socket *socket, uint8 *buf, uint16 len) {
     uint16 ptr = 0;
-    w5500_read_bytes_inv(W5500_Sn_RX_RD(n), (uint8*)&ptr, 2);
+    w5500_read_bytes_inv(W5500_Sn_RX_RD(socket->n), (uint8*)&ptr, 2);
 
-    uint32 addrbsb = ((uint32)ptr << 8) + (n << 5) + 0x18;
+    uint32 addrbsb = ((uint32)ptr << 8) + (socket->n << 5) + 0x18;
     w5500_read_bytes(addrbsb, buf, len);
 
     ptr += len;
-    w5500_write_bytes_inv(W5500_Sn_RX_RD(n), (uint8*)&ptr, 2);
+    w5500_write_bytes_inv(W5500_Sn_RX_RD(socket->n), (uint8*)&ptr, 2);
 
-    if (!w5500_send_sncmd(n, W5500_SnCR_RECV))
-        return Err_W5500_Socket_CmdErr;
+    if (!w5500_send_sncmd(socket->n, W5500_SnCR_RECV))
+        return -1;
 
-    return Err_W5500_No_Error;
+    return len;
 }
 /*
- * w5500_send_socket - 发送套接字@n
+ * w5500_receive_from - 接收数据,成功运行则返回接收到的数据长度,否则返回-1
+ *
+ * @socket: 套接字对象
+ * @buf: 数据缓存
+ * @len: 数据长度
  */
-w5500_error_t w5500_send_socket(uint8 n, uint8 *buf, uint16 len) {
-    if (len == 0)
-        return Err_W5500_No_Error;
+int w5500_receive_from(struct w5500_socket *socket, uint8 *buf, uint16 len) {
+    uint16 ptr = 0;
+    w5500_read_bytes_inv(W5500_Sn_RX_RD(socket->n), (uint8*)&ptr, 2);
 
+    uint8 head[8];
+    uint32 addrbsb = ((uint32)ptr << 8) + (socket->n << 5) + 0x18;
+    w5500_read_bytes(addrbsb, head, 8);
+    ptr += 8;
+
+    socket->remote_ip[0] = head[0];
+    socket->remote_ip[1] = head[1];
+    socket->remote_ip[2] = head[2];
+    socket->remote_ip[3] = head[3];
+    ((uint8 *)&(socket->remote_port))[1] = head[4];
+    ((uint8 *)&(socket->remote_port))[0] = head[5];
+    ((uint8 *)&len)[1] = head[6];
+    ((uint8 *)&len)[0] = head[7];
+
+    addrbsb = ((uint32)ptr << 8) + (socket->n << 5) + 0x18;
+    w5500_read_bytes(addrbsb, buf, len);
+
+    ptr += len;
+    w5500_write_bytes_inv(W5500_Sn_RX_RD(socket->n), (uint8*)&ptr, 2);
+
+    if (!w5500_send_sncmd(socket->n, W5500_SnCR_RECV))
+        return -1;
+
+    return len;
+}
+/*
+ * w5500_send - 发送数据
+ *
+ * @socket: 套接字对象
+ * @buf: 数据缓存
+ * @len: 数据长度
+ */
+w5500_error_t w5500_send(struct w5500_socket *socket, const uint8 *buf, uint16 len) {
     uint16 freesize = 0;
-    w5500_read_bytes_inv(W5500_Sn_TX_FSR(n), (uint8*)&freesize, 2);
+    w5500_read_bytes_inv(W5500_Sn_TX_FSR(socket->n), (uint8*)&freesize, 2);
     if (freesize < len)
         return Err_W5500_TxBuf_Overflow;
 
     uint16 ptr = 0;
-    w5500_read_bytes_inv(W5500_Sn_TX_WR(n), (uint8*)&ptr, 2);
+    w5500_read_bytes_inv(W5500_Sn_TX_WR(socket->n), (uint8*)&ptr, 2);
 
-    uint32 addrbsb = ((uint32)ptr << 8) + (n << 5) + 0x10;
+    uint32 addrbsb = ((uint32)ptr << 8) + (socket->n << 5) + 0x10;
     w5500_write_bytes(addrbsb, buf, len);
 
     ptr += len;
-    w5500_write_bytes_inv(W5500_Sn_TX_WR(n), (uint8*)&ptr, 2);
+    w5500_write_bytes_inv(W5500_Sn_TX_WR(socket->n), (uint8*)&ptr, 2);
 
-    if (!w5500_send_sncmd(n, W5500_SnCR_SEND))
+    if (!w5500_send_sncmd(socket->n, W5500_SnCR_SEND))
         return Err_W5500_Socket_CmdErr;
 
-    while (!(W5500_SnIR_SEND_OK & w5500_read_byte(W5500_Sn_IR(n)))) {
-        uint8 tmp = w5500_read_byte(W5500_Sn_SR(n));
-        if ((tmp != W5500_SnSR_ESTABLISHED) && (tmp != W5500_SnSR_CLOSE_WAIT)) {
-            w5500_close_socket(n);
-            return Err_W5500_SendData_Err;
+    while (!(W5500_SnIR_SEND_OK & w5500_read_byte(W5500_Sn_IR(socket->n)))) {
+        if (W5500_SnIR_TIMEOUT & w5500_read_byte(W5500_Sn_IR(socket->n))) {
+            w5500_write_byte(W5500_Sn_IR(socket->n), W5500_SnIR_TIMEOUT | W5500_SnIR_SEND_OK);
+            w5500_close_socket(socket);
+            return Err_W5500_Timeout;
         }
     }
 
-    w5500_write_byte(W5500_Sn_IR(n), W5500_SnIR_SEND_OK);
+    w5500_write_byte(W5500_Sn_IR(socket->n), W5500_SnIR_SEND_OK);
     return Err_W5500_No_Error;
 }
+/*
+ * w5500_send - 发送数据
+ *
+ * @socket: 套接字对象
+ * @buf: 数据缓存
+ * @len: 数据长度
+ */
+w5500_error_t w5500_send_to(struct w5500_socket *socket, const uint8 *buf, uint16 len) {
+    w5500_write_bytes(W5500_Sn_DIPR(socket->n), socket->remote_ip, 4);
+    w5500_write_bytes_inv(W5500_Sn_DPORT(socket->n), (uint8 *)&socket->remote_port, 2);
+
+    return w5500_send(socket, buf, len);
+}
+
+

@@ -82,6 +82,7 @@ void w5500_write_bytes(uint32 addrbsb, const uint8 *buf, int len);
 void w5500_write_bytes_inv(uint32 addrbsb, const uint8 *buf, int len);
 
 /******************************************************/
+
 /*
  * Sn_MR - 套接字n的模式寄存器
  */
@@ -154,30 +155,83 @@ void w5500_write_bytes_inv(uint32 addrbsb, const uint8 *buf, int len);
  */
 #define W5500_Sn_RX_RSR(n)      (0x002608 + (n<<5))
 #define W5500_Sn_RX_RD(n)       (0x002808 + (n<<5))
+
 /*
- * w5500_init_sn - 初始化套接字@n
+ * w5500_socket - w5500的套接字封装
  */
-w5500_error_t w5500_init_socket(uint8 n, uint8 mode, uint16 port);
+struct w5500_socket {
+    uint8 n;
+    uint8 mode;
+    uint8 remote_ip[4];
+    uint16 remote_port;
+    uint16 local_port;
+};
+
 /*
- * w5500_close_sn - 关闭套接字@n
+ * w5500_init_socket - 初始化套接字
+ *
+ * @socket: 套接字对象
  */
-w5500_error_t w5500_close_socket(uint8 n);
+w5500_error_t w5500_init_socket(const struct w5500_socket *socket);
+/*
+ * w5500_close_sn - 关闭套接字
+ *
+ * @socket: 套接字对象
+ */
+w5500_error_t w5500_close_socket(const struct w5500_socket *socket);
 /*
  * w5500_connect_socket - 连接套接字@n,TCP客户端模式
  */
-w5500_error_t w5500_connect_socket(uint8 n, uint8 *ip, uint16 port);
+w5500_error_t w5500_connect_socket(const struct w5500_socket *socket);
 /*
- * w5500_get_sn_received_len - 获取套接字@n接收到的数据长度
+ * w5500_listen_socket - 监听套接字@n, TCP服务器模式
+ *
+ * @socket: 套接字对象
  */
-uint16 w5500_get_socket_received_len(uint8 n);
+w5500_error_t w5500_listen_socket(const struct w5500_socket *socket);
 /*
- * w5500_receive_socket - 接收套接字@n
+ * w5500_get_socket_status - 获取套接字的状态
+ *
+ * @socket: 套接字对象
  */
-w5500_error_t w5500_receive_socket(uint8 n, uint8 *buf, uint16 len);
+#define w5500_get_socket_status(socket) w5500_read_byte(W5500_Sn_SR((socket)->n))
 /*
- * w5500_send_socket - 发送套接字@n
+ * w5500_get_sn_received_len - 获取套接字接收到的数据长度
+ *
+ * @socket: 套接字对象
  */
-w5500_error_t w5500_send_socket(uint8 n, uint8 *buf, uint16 len);
-
+uint16 w5500_get_socket_received_len(const struct w5500_socket *socket);
+/*
+ * w5500_receive - 接收数据,成功运行则返回接收到的数据长度,否则返回-1
+ *
+ * @socket: 套接字对象
+ * @buf: 数据缓存
+ * @len: 数据长度
+ */
+int w5500_receive(struct w5500_socket *socket, uint8 *buf, uint16 len);
+/*
+ * w5500_receive_from - 接收数据,成功运行则返回接收到的数据长度,否则返回-1
+ *
+ * @socket: 套接字对象
+ * @buf: 数据缓存
+ * @len: 数据长度
+ */
+int w5500_receive_from(struct w5500_socket *socket, uint8 *buf, uint16 len);
+/*
+ * w5500_send - 发送数据
+ *
+ * @socket: 套接字对象
+ * @buf: 数据缓存
+ * @len: 数据长度
+ */
+w5500_error_t w5500_send(struct w5500_socket *socket, const uint8 *buf, uint16 len);
+/*
+ * w5500_send_to - 发送数据
+ *
+ * @socket: 套接字对象
+ * @buf: 数据缓存
+ * @len: 数据长度
+ */
+w5500_error_t w5500_send_to(struct w5500_socket *socket, const uint8 *buf, uint16 len);
 
 #endif

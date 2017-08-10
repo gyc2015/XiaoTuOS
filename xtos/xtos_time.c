@@ -7,6 +7,14 @@ void xtos_tick(void) {
     gXtosTicks++;
 }
 
+uint32 xtos_get_ticks(void) {
+    return gXtosTicks;
+}
+
+void xtos_set_ticks(uint32 ticks) {
+    gXtosTicks = ticks;
+}
+
 void xtos_delay_ticks(uint32 ticks) {
     uint32 origin = gXtosTicks;
     uint32 delta = gXtosTicks - origin;
