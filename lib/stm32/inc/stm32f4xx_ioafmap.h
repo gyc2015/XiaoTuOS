@@ -10,6 +10,8 @@
 
 #define GPIO_AF_TIM1    0x01
 #define GPIO_AF_TIM2    0x01
+#define GPIO_AF_TIM8    0x03
+#define GPIO_AF_I2C1    0x04
 
 #define GPIO_AF_SPI1    0x05
 #define GPIO_AF_USART3  0x07

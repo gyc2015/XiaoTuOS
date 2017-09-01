@@ -472,6 +472,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\board\src\systick.c</FilePath>
             </File>
+            <File>
+              <FileName>i2c1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\board\src\i2c1.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -521,6 +526,16 @@
               <FileName>stm32f4xx_timer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\lib\stm32\src\stm32f4xx_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\stm32\src\stm32f4xx_i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_fi2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\stm32\src\stm32f4xx_fi2c.c</FilePath>
             </File>
           </Files>
         </Group>
