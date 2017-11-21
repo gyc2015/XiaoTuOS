@@ -1,18 +1,18 @@
 /***********************************************************
- *
- * stm32f4xx_timer - 计时器
- *
- ************************************** 高乙超.2017.0618 ***/
+*
+* stm32f4xx_timer - 计时器
+*
+************************************** 高乙超.2017.0618 ***/
 #pragma once
 
 #include <types.h>
 
 /*
- * TIM控制寄存器1 TIMx_CR1
- * 偏移地址: 0x00
- * 复位值: 0x0000
- * 访问: 无等待状态, half-word访问
- */
+* TIM控制寄存器1 TIMx_CR1
+* 偏移地址: 0x00
+* 复位值: 0x0000
+* 访问: 无等待状态, half-word访问
+*/
 #define TIM_COUNT_DIR_UP        0
 #define TIM_COUNT_DIR_DOWN      1
 #define TIM_COUNT_DIR_CENTER1   2
@@ -41,11 +41,11 @@ union timer_cr1 {
     uint16 all;
 };
 /*
- * TIM控制寄存器2 TIMx_CR2
- * 偏移地址: 0x04
- * 复位值: 0x0000
- * 访问: 无等待状态, half-word访问
- */
+* TIM控制寄存器2 TIMx_CR2
+* 偏移地址: 0x04
+* 复位值: 0x0000
+* 访问: 无等待状态, half-word访问
+*/
 struct timer_cr2_bits {
     /* Capture/Compare Preloaded Control */
     uint16 CCPC : 1;
@@ -72,11 +72,11 @@ union timer_cr2 {
     uint16 all;
 };
 /*
- * TIM从模式控制寄存器 TIMx_SMCR
- * 偏移地址: 0x08
- * 复位值: 0x0000
- * 访问: 无等待状态, half-word访问
- */
+* TIM从模式控制寄存器 TIMx_SMCR
+* 偏移地址: 0x08
+* 复位值: 0x0000
+* 访问: 无等待状态, half-word访问
+*/
 struct timer_smcr_bits {
     uint16 SMS : 3;
     uint16 rsv0 : 1;
@@ -92,11 +92,11 @@ union timer_smcr {
     uint16 all;
 };
 /*
- * TIM DMA中断使能寄存器 TIMx_DIER
- * 偏移地址: 0x0C
- * 复位值: 0x0000
- * 访问: 无等待状态, half-word访问
- */
+* TIM DMA中断使能寄存器 TIMx_DIER
+* 偏移地址: 0x0C
+* 复位值: 0x0000
+* 访问: 无等待状态, half-word访问
+*/
 struct timer_dier_bits {
     uint16 UIE : 1;
     uint16 CC1IE : 1;
@@ -120,11 +120,11 @@ union timer_dier {
     uint16 all;
 };
 /*
- * TIM状态寄存器 TIMx_SR
- * 偏移地址: 0x10
- * 复位值: 0x0000
- * 访问: 无等待状态, half-word访问
- */
+* TIM状态寄存器 TIMx_SR
+* 偏移地址: 0x10
+* 复位值: 0x0000
+* 访问: 无等待状态, half-word访问
+*/
 struct timer_sr_bits {
     uint16 UIF : 1;
     uint16 CC1IF : 1;
@@ -146,11 +146,11 @@ union timer_sr {
     uint16 all;
 };
 /*
- * TIM事件生成寄存器 TIMx_EGR
- * 偏移地址: 0x14
- * 复位值: 0x0000
- * 访问: 无等待状态, half-word访问
- */
+* TIM事件生成寄存器 TIMx_EGR
+* 偏移地址: 0x14
+* 复位值: 0x0000
+* 访问: 无等待状态, half-word访问
+*/
 struct timer_egr_bits {
     uint16 UG : 1;
     uint16 CC1G : 1;
@@ -167,11 +167,11 @@ union timer_egr {
     uint16 all;
 };
 /*
- * TIM捕获/比较模式寄存器 TIMx_CCMR
- * 偏移地址: 0x18,0x1C
- * 复位值: 0x0000
- * 访问: 无等待状态, half-word访问
- */
+* TIM捕获/比较模式寄存器 TIMx_CCMR
+* 偏移地址: 0x18,0x1C
+* 复位值: 0x0000
+* 访问: 无等待状态, half-word访问
+*/
 #define TIM_OCMode_Frozen   0   /* 输出对比寄存器CCR与计数寄存器CNT的对比关系不影响输出 */
 #define TIM_OCMode_ACT      1   /* 当计数寄存器CNT与对比寄存器CCR相等时, OCxREF信号置高 */
 #define TIM_OCMode_INACT    2   /* 置OCxREF低 */
@@ -180,6 +180,17 @@ union timer_egr {
 #define TIM_OCMode_FACT     5   /* 强制OCxREF为高 */
 #define TIM_OCMode_PWM1     6   /* 向上计数时,当CNT < CCR时 OCxREF = 1 否则OCxREF = 0, 向下计数时, 当CNT > CCR时 OCxREF = 0 否则OCxREF = 1 */
 #define TIM_OCMode_PWM2     7   /* 输出电平逻辑与PWM1相反 */
+
+#define TIM_Channel_Mode_Output 0   /* 输出模式 */
+#define TIM_Channel_Mode_Input1 1   /* 输入模式1, ICx => TIx */
+#define TIM_Channel_Mode_Input2 2   /* 输入模式2, ICx => TIy */
+#define TIM_Channel_Mode_Input3 3   /* 输入模式3, ICx => TRC */
+
+#define TIM_ICMode_PSC_0    0   /* 输入捕获0分频 */
+#define TIM_ICMode_PSC_2    1   /* 输入捕获2分频 */
+#define TIM_ICMode_PSC_4    2   /* 输入捕获4分频 */
+#define TIM_ICMode_PSC_8    3   /* 输入捕获8分频 */
+
 struct timer_oc_cfg {
     uint8 CCxS : 2;
     uint8 OCxFE : 1;
@@ -223,7 +234,7 @@ struct timer_ccmr_oc_bits {
     /* OC Clear Enable */
     uint16 OC24CE : 1;
 };
-struct timer_ccmr_ic_bits{
+struct timer_ccmr_ic_bits {
     /* 选择工作模式 */
     uint16 CC13S : 2;
     uint16 IC13PSC : 2;
@@ -240,11 +251,11 @@ union timer_ccmr {
     uint16 all;
 };
 /*
- * TIM捕获/比较使能寄存器 TIMx_CCER
- * 偏移地址: 0x20
- * 复位值: 0x0000
- * 访问: 无等待状态, half-word访问
- */
+* TIM捕获/比较使能寄存器 TIMx_CCER
+* 偏移地址: 0x20
+* 复位值: 0x0000
+* 访问: 无等待状态, half-word访问
+*/
 struct timer_cen {
     uint8 CCxE : 1;
     uint8 CCxP : 1;
@@ -282,11 +293,11 @@ union timer_ccer {
     uint16 all;
 };
 /*
- * TIM中断和死区寄存器 TIMx_BDTR
- * 偏移地址: 0x44
- * 复位值: 0x0000
- * 访问: 无等待状态, half-word访问
- */
+* TIM中断和死区寄存器 TIMx_BDTR
+* 偏移地址: 0x44
+* 复位值: 0x0000
+* 访问: 无等待状态, half-word访问
+*/
 struct timer_bdtr_bits {
     uint16 DTG : 8;
     uint16 LOCK : 2;
@@ -302,11 +313,11 @@ union timer_bdtr {
     uint16 all;
 };
 /*
- * TIM DMA控制寄存器 TIMx_DCR
- * 偏移地址: 0x48
- * 复位值: 0x0000
- * 访问: 无等待状态, half-word访问
- */
+* TIM DMA控制寄存器 TIMx_DCR
+* 偏移地址: 0x48
+* 复位值: 0x0000
+* 访问: 无等待状态, half-word访问
+*/
 struct timer_dcr_bits {
     uint16 DBA : 5;
     uint16 rsv0 : 3;
@@ -387,20 +398,20 @@ typedef struct timer_regs {
 /***********************************************************************/
 
 /*
- * timer_set_ccmr - 设置计时器通道,工作模式
- *
- * @tim: 计时器
- * @c: 通道
- * @cfg: 配置
- */
+* timer_set_ccmr - 设置计时器通道,工作模式
+*
+* @tim: 计时器
+* @c: 通道
+* @cfg: 配置
+*/
 void timer_set_ccmr(timer_regs_t * tim, uint8 c, union timer_chanel_mode cfg);
 /*
- * timer_set_ccer - 设置计时器通道,使能和工作电平
- *
- * @tim: 计时器
- * @c: 通道
- * @cen: 配置
- */
+* timer_set_ccer - 设置计时器通道,使能和工作电平
+*
+* @tim: 计时器
+* @c: 通道
+* @cen: 配置
+*/
 void timer_set_ccer(timer_regs_t * tim, uint8 c, union timer_chanel_en cen);
 
 
