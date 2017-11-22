@@ -22,7 +22,8 @@ void tim1_init(void) {
     TIM1->CR1.bits.DIR = TIM_COUNT_DIR_UP;
     TIM1->PSC = 167;
     TIM1->ARR = 65535;
-    TIM1->EGR.all |= 0x02;
+    TIM1->EGR.bits.CC1G = 1;
+    TIM1->EGR.bits.CC2G = 1;
     TIM1->CR1.bits.ARPE = 1;
     // PA8 : TIM1CH1
     RCC->AHB1ENR.bits.gpioa = 1;
@@ -30,7 +31,7 @@ void tim1_init(void) {
     GPIOA->MODER.bits.pin8 = GPIO_Mode_Af;
     GPIOA->OTYPER.bits.pin8 = GPIO_Pull_No;
     GPIOA->OSPEEDR.bits.pin8 = GPIO_OType_OD;
-    // 输入通道
+    // 输入通道1
     union timer_chanel_mode cfg;
     cfg.ic.CCxS = TIM_Channel_Mode_Input1;
     cfg.ic.ICxPSC = TIM_ICMode_PSC_0;
@@ -41,14 +42,27 @@ void tim1_init(void) {
     cen.bits.CCxNP = 0;
     timer_set_ccmr(TIM1, 1, cfg);
     timer_set_ccer(TIM1, 1, cen);
+    // 输入通道2
+    cfg.byte = 0;
+    cfg.ic.CCxS = TIM_Channel_Mode_Input2;
+    cfg.ic.ICxPSC = TIM_ICMode_PSC_0;
+    cfg.ic.ICxF = 0xF;
+    cen.all = 0;
+    cen.bits.CCxE = 1;
+    cen.bits.CCxP = 1;
+    cen.bits.CCxNP = 0;
+    timer_set_ccmr(TIM1, 2, cfg);
+    timer_set_ccer(TIM1, 2, cen);
     // 使能中断
     TIM1->DIER.bits.CC1IE = 1;
     TIM1->CR1.bits.CEN = 1;
 }
 
 uint32 gDuring = 0;
+uint32 gDuty = 0;
 void TIM1_CC_IRQHandler(void) {
     if (1 == TIM1->SR.bits.CC1IF) {
+        gDuty = TIM1->CCR2;
         gDuring = TIM1->CCR1;
         TIM1->CNT = 0;
     }
@@ -75,6 +89,10 @@ int main(void) {
         switch (gUartByte) {
         case 'a':
             uart4_send_bytes((uint8*)&gDuring, 4);
+            gUartByte = 0;
+            break;
+        case 'A':
+            uart4_send_bytes((uint8*)&gDuty, 4);
             gUartByte = 0;
             break;
         }
