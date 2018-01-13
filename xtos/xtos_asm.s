@@ -12,6 +12,9 @@
 	EXTERN gp_xtos_cur_task
 	EXTERN gp_xtos_next_task
 
+	EXPORT xtos_lock
+	EXPORT xtos_unlock
+
 	EXPORT xtos_first_switch
 	EXPORT xtos_context_switch
 	EXPORT xtos_pendsv_handler
@@ -28,6 +31,41 @@ PENDSV_SET		EQU     0x10000000                              ; Value to trigger P
     THUMB
     REQUIRE8
     PRESERVE8
+
+;********************************************************************************************************
+;                                      关闭可屏蔽中断(系统上锁)
+;									     int xtos_lock(void)
+;
+; 1. 保存中断屏蔽寄存器PRIMASK到R0中
+;
+; 2. 关闭可屏蔽中断
+;
+; 3. 退出时R0中保存的PRIMASK作为return数据返回
+;
+; 4. 与函数xtos_unlock成对使用
+;
+;********************************************************************************************************
+
+xtos_lock
+    MRS     R0, PRIMASK         ; 保存中断屏蔽寄存器PRIMASK到R0中
+    CPSID   I                   ; 关闭中断
+    BX      LR
+
+;********************************************************************************************************
+;                                      打开可屏蔽中断(系统解锁)
+;									  void xtos_unlock(int key)
+;
+; 1. 参数key通过内核寄存器R0传递
+;
+; 2. 把R0的值写回到PRIMASK恢复进入临界区前的状态
+;
+; 3. 与函数xtos_lock成对使用
+;
+;********************************************************************************************************
+
+xtos_unlock
+    MSR     PRIMASK, R0			; 把R0的值写回到PRIMASK恢复进入临界区前的状态
+    BX      LR
 
 ;********************************************************************************************************
 ;                                         启动操作系统
@@ -54,7 +92,7 @@ xtos_first_switch
     LDR     R1, =PENDSV_SET
     STR     R1, [R0]
 
-    CPSIE   I                                                   ; 开中断
+    BX      LR
 
 xtos_start_hang
     B       xtos_start_hang                                     ; Should never get here
@@ -126,4 +164,5 @@ context_switch_load_senario
 	CPSIE	I											; 开中断
 	BX		LR											; 中断返回恢复中断现场时，从栈空间中取出Caller Saved Registers
 
+	NOP
 	END

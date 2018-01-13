@@ -22,6 +22,9 @@ typedef struct xtos_task_descriptor {
 extern struct xtos_task_descriptor *gp_xtos_cur_task;
 extern struct xtos_task_descriptor *gp_xtos_next_task;
 
+
+int xtos_lock(void);
+void xtos_unlock(int key);
 /*
  * xtos_init - 初始化操作系统
  */
