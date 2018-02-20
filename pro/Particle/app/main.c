@@ -3,7 +3,7 @@
 #include <systick.h>
 #include <led.h>
 #include <uart4.h>
-
+#include <sdio.h>
 #include <utils.h>
 
 #define TASKA_STK_SIZE 1024
@@ -39,13 +39,34 @@ void UART4_IRQHandler(void) {
 }
 
 void config_interruts(void);
+struct sd_card gSDCard;
+uint8 writebuf[512];
+uint8 readbuf[512];
 
 int main(void) {
 	systick_init(168000);
 	led_pwm_init();
 	uart4_init(115200);
+	sdio_init(&gSDCard);
 
 	config_interruts();
+
+	uart4_send_str("G.Y.C");
+	for (int i = 0; i < 512; i++)
+		writebuf[i] = 'B';
+	delay(1000000);
+	sdio_write_block(&gSDCard, 0, writebuf);
+	delay(1000000);
+	uart4_send_str("\r\nG.Y.C\r\n");
+
+	sdio_read_block(&gSDCard, 0, readbuf);
+	delay(1000000);
+	uart4_send_str("\r\n====\r\n");
+	for (int i = 0; i < 512; i++)
+		uart4_send_byte(readbuf[i]);
+	uart4_send_str("\r\n====\r\n");
+
+
 
 	xtos_init();
 	xtos_init_task_descriptor(&taskA, taska, &taskA_Stk[TASKA_STK_SIZE - 1], 0);

@@ -7,6 +7,12 @@ void config_interruts(void) {
     NVIC->IPR.bits.UART4_Irq = 0x80;
     NVIC->ISER.bits.UART4_Irq = 1;
 
+	NVIC->IPR.bits.SDIO_Irq = 0x00;
+	NVIC->ISER.bits.SDIO_Irq = 1;
+
+	NVIC->IPR.bits.DMA2_Stream3_Irq = 0x00;
+	NVIC->ISER.bits.DMA2_Stream3_Irq = 1;
+
     //NVIC->IPR.bits.TIM3_Irq = 0x00;
     //NVIC->ISER.bits.TIM3_Irq = 1;
 

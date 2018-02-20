@@ -1,10 +1,10 @@
 /***********************************************************
  *
- * stm32f407_rcc - 复位和时钟控制,Reset and Clock Control
+ * stm32f4xx_rcc - 复位和时钟控制,Reset and Clock Control
  *
  ************************************** 高乙超.2016.1224 ***/
-#ifndef STM32F407_RCC_H
-#define STM32F407_RCC_H
+#ifndef STM32F4XX_RCC_H
+#define STM32F4XX_RCC_H
 
 #include <types.h>
 
