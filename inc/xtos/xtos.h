@@ -9,6 +9,9 @@
 // xtos任务入口
 typedef void(*xtos_task)(void);
 
+#define XTOS_TASK_STATE_RUNNING		((uint16)0)
+#define XTOS_TASK_STATE_SLEEPING	((uint16)1)
+
 /*
  * xtos_task_struct - 任务描述符
  */
@@ -16,6 +19,7 @@ typedef struct xtos_task_descriptor {
     uint32 *pTopOfStack;        /* 栈顶地址,该位段不可以更改 */
     uint32 *pBottomOfStack;     /* 栈底地址 */
     uint16 pid;                 /* 进程ID */
+	uint16 taskState;			/* 进程状态 */
     struct list_head list;      /* 链表对象 */
 } xtos_task_desp_t;
 
@@ -30,8 +34,14 @@ void xtos_unlock(int key);
  */
 void xtos_init(void);
 void xtos_start(void);
-void xtos_schedule(void);
 
+/*
+ * 进程管理
+ */
+void xtos_block_task(struct xtos_task_descriptor *tcb);
+void xtos_wakeup_task(struct xtos_task_descriptor *tcb);
+void xtos_schedule(void);
+void xtos_block(void);
 /*
  * xtos_init_task_struct - 创建一个任务，初始化任务栈空间
  *

@@ -45,11 +45,4 @@ void uart4_send_str(const uint8 *str) {
     }
 }
 
-extern uint8 gUartByte;
-void UART4_IRQHandler(void) {
-    if (0 != UART4->SR.bits.RXNE) {
-        gUartByte = UART4->DR.bits.byte;
-        uart4_send_byte(gUartByte);
-    }
-}
 

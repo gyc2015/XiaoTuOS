@@ -3,7 +3,8 @@
 struct xtos_task_descriptor *gp_xtos_cur_task;
 struct xtos_task_descriptor *gp_xtos_next_task;
 
-struct list_head L0_tasks;
+struct list_head Sleeping_tasks;	// SLEEPING进程,挂起队列
+struct list_head L0_tasks;			// RUNNING进程
 
 void xtos_first_switch(void);
 void xtos_context_switch(void);
@@ -15,7 +16,45 @@ void xtos_pendsv_handler(void);
  */
 void xtos_init() {
     init_list_head(&L0_tasks);
+	init_list_head(&Sleeping_tasks);
 }
+/*
+ * xtos_block_task - 挂起进程
+ */
+void xtos_block_task(struct xtos_task_descriptor *tcb) {
+	int primask = xtos_lock();
+	if (gp_xtos_next_task == tcb)
+		gp_xtos_next_task = gp_xtos_cur_task;
+
+	list_move_tail(&tcb->list, &Sleeping_tasks);
+	tcb->taskState = XTOS_TASK_STATE_SLEEPING;
+
+	xtos_unlock(primask);
+}
+/*
+ * xtos_wakeup_task - 唤醒进程
+ */
+void xtos_wakeup_task(struct xtos_task_descriptor *tcb) {
+	if (XTOS_TASK_STATE_SLEEPING != tcb->taskState)
+		return;
+
+	int primask = xtos_lock();
+
+	list_move_tail(&tcb->list, &L0_tasks);
+	tcb->taskState = XTOS_TASK_STATE_RUNNING;
+
+	xtos_unlock(primask);
+}
+/*
+ * xtos_block - 挂起当前进程
+ */
+void xtos_block() {
+	xtos_block_task(gp_xtos_cur_task);
+	xtos_schedule();
+}
+
+
+
 /*
  * xtos_task_finished - 任务结束后的回调函数
  */
@@ -114,11 +153,9 @@ void xtos_init_task_descriptor(struct xtos_task_descriptor *tcb, xtos_task task,
  */
 void xtos_schedule(void) {
 	int primask = xtos_lock();
-	list_add_tail(&gp_xtos_next_task->list, &L0_tasks);
 
     gp_xtos_next_task = list_first_entry(&L0_tasks, struct xtos_task_descriptor, list);
-
-    list_del(&gp_xtos_next_task->list);
+	list_move_tail(&gp_xtos_next_task->list, &L0_tasks);
 
     xtos_context_switch();
 	xtos_unlock(primask);
@@ -129,8 +166,6 @@ void xtos_schedule(void) {
 void xtos_start(void) {
     __asm("CPSID    I");
     gp_xtos_next_task = list_first_entry(&L0_tasks, struct xtos_task_descriptor, list);
-
-    list_del(&gp_xtos_next_task->list);
 
     xtos_first_switch();
     __asm("CPSIE   I");

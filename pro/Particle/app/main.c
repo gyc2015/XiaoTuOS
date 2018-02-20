@@ -23,21 +23,29 @@ void taska() {
 	}
 }
 
+uint8 gUartByte = '0';
 void taskb() {
 	while (1) {
-		uart4_send_byte('A');
-		xtos_delay_ticks(1000);
-		uart4_send_byte('B');
-		xtos_delay_ticks(1000);
+		uart4_send_byte(gUartByte);
+		xtos_block();
 	}
 }
 
-uint8 gUartByte;
+void UART4_IRQHandler(void) {
+	if (0 != UART4->SR.bits.RXNE) {
+		gUartByte = UART4->DR.bits.byte;
+		xtos_wakeup_task(&taskB);
+	}
+}
+
+void config_interruts(void);
 
 int main(void) {
 	systick_init(168000);
 	led_pwm_init();
 	uart4_init(115200);
+
+	config_interruts();
 
 	xtos_init();
 	xtos_init_task_descriptor(&taskA, taska, &taskA_Stk[TASKA_STK_SIZE - 1], 0);
